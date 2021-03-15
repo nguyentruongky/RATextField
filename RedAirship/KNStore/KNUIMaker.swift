@@ -274,7 +274,7 @@ extension UIButton {
 
 extension UILabel {
     convenience init(text: String? = nil,
-                     font: UIFont = .systemFont(ofSize: 15),
+                     font: UIFont? = nil,
                      color: UIColor? = .black,
                      numberOfLines: Int = 1,
                      alignment: NSTextAlignment = .left) {

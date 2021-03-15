@@ -89,15 +89,15 @@ class DemoController: UITableViewController {
                                              viewSpaces: 32,
                                              topSpace: 32,
                                              bottomSpace: 16)
-            textField.height(44)
+            
             textField.horizontalSuperview(space: 16)
             button.centerXToSuperview()
         } else {
-            textField.height(44)
             cell.contentView.addSubviews(views: textField)
             textField.fillSuperView(space: UIEdgeInsets(space: 16))
         }
         
+        textField.height(64)
         return cell
     }
     

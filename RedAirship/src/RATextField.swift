@@ -11,17 +11,17 @@ class RATextField: UITextField {
     struct FormatOption {
         var titleColor = UIColor.black
         var titleFont = UIFont.systemFont(ofSize: 12)
-        var titleY: CGFloat = -12
+        var titleY: CGFloat = 0
         
         var lineActiveColor = UIColor.blue
         var lineInactiveColor = UIColor.lightGray
         var errorColor = UIColor.red
         var helperColor = UIColor.darkGray
         
-        var leftPadding: CGFloat = 32
+        var leftPadding: CGFloat = 16
         var prefixColor = UIColor.black
         
-        var rightPadding: CGFloat = 32
+        var rightPadding: CGFloat = 16
         var suffixColor = UIColor.black
         
         var iconSize: CGFloat = 32
@@ -46,6 +46,7 @@ class RATextField: UITextField {
     private var hasError = false
     private var isStatic = false 
     
+    private let paddingFromCenter: CGFloat = 4
     
     
     // Initialize
@@ -104,13 +105,13 @@ class RATextField: UITextField {
         underline.backgroundColor = option.lineInactiveColor
         addSubviews(views: underline)
         underline.horizontalSuperview()
-        underline.bottomToSuperview()
+        underline.centerYToSuperview(space: 24)
         underline.height(1)
         
         helperLabel.isHidden = true
         addSubviews(views: helperLabel)
         helperLabel.horizontalSuperview()
-        helperLabel.bottomToSuperview(space: 16)
+        helperLabel.verticalSpacing(toView: underline, space: 4)
     }
     
     
@@ -123,6 +124,8 @@ class RATextField: UITextField {
                 option.titleFont = font.withSize(font.pointSize - 4)
             }
             titleLabel.font = font
+            prefixLabel?.font = font
+            suffixLabel?.font = font
         }
     }
     
@@ -160,8 +163,6 @@ class RATextField: UITextField {
             setTitleY(option.titleY)
         }
         
-        layoutIconIfNeeded(leftIcon)
-        layoutIconIfNeeded(rightIcon)
         layoutTextLink()
     }
 
@@ -182,12 +183,10 @@ extension RATextField {
         
         titleLabel.frame.origin.y = (frame.height - titleLabel.frame.height) / 2
     }
-    
-    // Placeholder functions
-    
+        
     func setTitle(_ title: String) {
-        setupPlaceholder()
         titleLabel.text = title
+        setupPlaceholder()
     }
     
     private func setupPlaceholder() {
@@ -195,9 +194,8 @@ extension RATextField {
         option.titleFont = defaultFont
         titleLabel.font = font
         titleLabel.textColor = option.titleColor
-        addSubviews(views: titleLabel)
-//        titleLabel.leftToSuperview()
-//        titleLabel.centerYToSuperview()
+        titleLabel.sizeToFit()
+        addSubview(titleLabel)
     }
     
     private func movePlaceholderUp() {
@@ -213,7 +211,7 @@ extension RATextField {
     private func movePlaceholderDown() {
         titleLabel.font = option.titleFont
         let textFieldHeight = frame.height
-        let y = (textFieldHeight - titleLabel.frame.height) / 2
+        let y = (textFieldHeight - titleLabel.frame.height) / 2 + paddingFromCenter
         UIView.animate(withDuration: 0.3) {
             [weak self] in
             self?.setTitleY(y)
@@ -291,9 +289,10 @@ extension RATextField {
     
     private func setupPrefix(_ text: String) {
         let label = UILabel(text: text, color: option.prefixColor)
-        label.sizeToFit()
-        label.frame.size.width += 32
-        leftView = label
+        leftView = UIView()
+        leftView?.addSubviews(views: label)
+        label.horizontalSuperview()
+        label.centerYToSuperview(space: paddingFromCenter)
         leftViewMode = .always
         
         addGesture(to: label, selector: #selector(didPressPrefix))
@@ -311,9 +310,10 @@ extension RATextField {
     
     private func setupSuffix(_ text: String) {
         let label = UILabel(text: text, color: option.prefixColor, alignment: .center)
-        label.sizeToFit()
-        label.frame.size.width += 32
-        rightView = label
+        rightView = UIView()
+        rightView?.addSubviews(views: label)
+        label.horizontalSuperview()
+        label.centerYToSuperview(space: paddingFromCenter)
         rightViewMode = .always
         
         addGesture(to: label, selector: #selector(didPressSuffix))
@@ -331,21 +331,20 @@ extension RATextField {
 
 // MARK: LEFT RIGHT ICON
 extension RATextField {
-    private func layoutIconIfNeeded(_ icon: UIImageView?) {
-        if let icon = icon {
-            icon.frame.origin.y = (frame.height - icon.frame.height) / 2
-        }
-    }
     
     // Left Icon
     
     private func setupLeftIcon(_ icon: UIImage) {
+        let size = option.iconSize - 12
         let imageView = UIImageView(image: icon)
-        imageView.frame = CGRect(x: 0, y: 0, width: option.iconSize, height: option.iconSize)
         imageView.changeColor(to: option.iconColor)
         
-        leftView = imageView
+        leftView = UIView()
+        leftView?.addSubviews(views: imageView)
         leftViewMode = .always
+        imageView.square(edge: size)
+        imageView.horizontalSuperview()
+        imageView.centerYToSuperview(space: paddingFromCenter)
         
         addGesture(to: imageView, selector: #selector(didPressLeftIcon))
         leftIcon = imageView
@@ -361,12 +360,16 @@ extension RATextField {
     // Right Icon
     
     private func setupRightIcon(_ icon: UIImage) {
+        let size = option.iconSize - 12
         let imageView = UIImageView(image: icon)
-        imageView.frame = CGRect(x: 0, y: 0, width: option.iconSize, height: option.iconSize)
         imageView.changeColor(to: option.iconColor)
         
-        rightView = imageView
+        rightView = UIView()
+        rightView?.addSubviews(views: imageView)
         rightViewMode = .always
+        imageView.square(edge: size)
+        imageView.horizontalSuperview()
+        imageView.centerYToSuperview(space: paddingFromCenter)
         
         addGesture(to: imageView, selector: #selector(didPressRightIcon))
         rightIcon = imageView
@@ -472,6 +475,7 @@ extension RATextField {
             frame.size.width = frame.size.width - padding - frame.origin.x - option.rightPadding
         }
 
+        frame.origin.y = paddingFromCenter
         return frame
     }
     
