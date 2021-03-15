@@ -446,13 +446,15 @@ extension RATextField {
     private func setStaticFont(isStatic: Bool) {
         let titleFont = option.titleFont
         if isStatic {
-            font = font?.withWeight(.bold)
+            font = UIFont.bold(size: font?.pointSize ?? 17)
         } else {
             font = titleFont
         }
         
         option.titleFont = titleFont
         titleLabel.font = titleFont.withSize(titleFont.pointSize - 4)
+        prefixLabel?.font = titleFont
+        suffixLabel?.font = titleFont
     }
     
     private func getTextArea(bounds: CGRect) -> CGRect {

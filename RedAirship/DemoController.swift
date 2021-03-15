@@ -14,6 +14,10 @@ class DemoController: UITableViewController {
         }
     }
     
+    let titleWithFormatTextField = RATextField(label: "Username",
+                                               option: RATextField.FormatOption(
+                                                titleColor: UIColor.blue,
+                                                iconColor: UIColor.brown))
     let errorTextField = RATextField(label: "Username")
     let helperTextField = RATextField(label: "Password")
     let staticTextField = RATextField(label: "Static text")
@@ -52,6 +56,8 @@ class DemoController: UITableViewController {
                                         buttonTitle: "Toggle Static",
                                         action: #selector(toggleStatic))
         let prefixCell = createTextCell(textField: prefixTextField)
+        prefixTextField.text = "Hello static text"
+        prefixTextField.setStatic(isEnabled: true)
         let suffixCell = createTextCell(textField: suffixTextField)
         let leftIconCell = createTextCell(textField: leftIconTextField)
         leftIconTextField.setTitle("Left icon title")
@@ -119,7 +125,7 @@ class DemoController: UITableViewController {
             helperTextField.setHelper(visible: true, content: "Password must have 8 letters at least")
         } else {
             // notice
-            helperTextField.setError(visible: false)
+            helperTextField.setHelper(visible: false)
         }
     }
 
