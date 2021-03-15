@@ -14,16 +14,25 @@ class DemoController: UITableViewController {
         }
     }
     
+    let errorTextField = RATextField(label: "Username")
+    let helperTextField = RATextField(label: "Password")
+    let staticTextField = RATextField(label: "Static text")
+    let prefixTextField = RATextField(prefix: "+84")
+    let suffixTextField = RATextField(suffix: "CUR")
+
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         
+        tableView.estimatedRowHeight = 100
+        tableView.rowHeight = UITableView.automaticDimension
         setupview()
+        
+        prefixTextField.raDelegate = self
+        suffixTextField.raDelegate = self
     }
-    let errorTextField = RATextField(label: "Username")
-    let helperTextField = RATextField(label: "Password")
-    let staticTextField = RATextField(label: "Static text")
-
+    
     // ignore
     func setupview() {
         tableView.keyboardDismissMode = .interactive
@@ -37,30 +46,40 @@ class DemoController: UITableViewController {
         let staticCell = createTextCell(textField: staticTextField,
                                         buttonTitle: "Toggle Static",
                                         action: #selector(toggleStatic))
-        
+        let prefixCell = createTextCell(textField: prefixTextField)
+        let suffixCell = createTextCell(textField: suffixTextField)
         dataSource = [
             errorCell,
             helperCell,
-            staticCell
+            staticCell,
+            prefixCell,
+            suffixCell
         ]
     }
     
     // ignore
-    func createTextCell(textField: RATextField, buttonTitle: String, action: Selector) -> UITableViewCell {
+    func createTextCell(textField: RATextField, buttonTitle: String? = nil, action: Selector? = nil) -> UITableViewCell {
         let cell = UITableViewCell()
+        cell.backgroundColor = .white
         cell.selectionStyle = .none
         
-        let button = UIButton(title: buttonTitle)
-        button.addTarget(self, action: action)
-        
-        cell.contentView.addSubviews(views: textField, button)
-        cell.contentView.stackVertically(views: [textField, button],
-                                         viewSpaces: 32,
-                                         topSpace: 32,
-                                         bottomSpace: 16)
-        textField.height(44)
-        textField.horizontalSuperview(space: 16)
-        button.centerXToSuperview()
+        if let action = action {
+            let button = UIButton(title: buttonTitle)
+            button.addTarget(self, action: action)
+            
+            cell.contentView.addSubviews(views: textField, button)
+            cell.contentView.stackVertically(views: [textField, button],
+                                             viewSpaces: 32,
+                                             topSpace: 32,
+                                             bottomSpace: 16)
+            textField.height(44)
+            textField.horizontalSuperview(space: 16)
+            button.centerXToSuperview()
+        } else {
+            textField.height(44)
+            cell.contentView.addSubviews(views: textField)
+            textField.fillSuperView(space: UIEdgeInsets(space: 16))
+        }
         
         return cell
     }
@@ -99,6 +118,7 @@ class DemoController: UITableViewController {
     }
 }
 
+// ignore
 extension DemoController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return dataSource.count
@@ -108,4 +128,15 @@ extension DemoController {
     }
 }
 
-
+extension DemoController: RATextFieldDelegate {
+    func didPressPrefix(label: UILabel) {
+        print("hello prefix")
+        label.text = "+65"
+    }
+    
+    func didPressSuffix(label: UILabel) {
+        print("hello suffix")
+        label.text = "Change"
+    }
+    
+}

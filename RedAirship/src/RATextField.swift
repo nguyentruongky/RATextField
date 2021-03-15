@@ -17,18 +17,28 @@ class RATextField: UITextField {
         var lineInactiveColor = UIColor.lightGray
         var errorColor = UIColor.red
         var helperColor = UIColor.darkGray
-        var leftPadding: CGFloat = 8
+        
+        var prefixPadding: CGFloat = 32
+        var prefixColor = UIColor.black
+        
+        var suffixPadding: CGFloat = 32
+        var suffixColor = UIColor.black
     }
     
 
-    private var titleLabel = UILabel()
+    weak var raDelegate: RATextFieldDelegate?
+    
+    private let titleLabel = UILabel()
     private let helperLabel = UILabel(font: .systemFont(ofSize: 12),
                                       color: .red)
+    private var prefixLabel: UILabel?
+    private var suffixLabel: UILabel?
     private var option: FormatOption
     private let underline = UIView(background: .gray)
     private var hasError = false
-    
     private var isStatic = false 
+    
+    
     
     // Initialize
     
@@ -41,10 +51,21 @@ class RATextField: UITextField {
     convenience init(label: String, option: FormatOption = FormatOption()) {
         self.init(frame: .zero)
         self.option = option
-        titleLabel = UILabel()
         titleLabel.text = label
         titleLabel.textColor = .black
         setupPlaceholder()
+    }
+    
+    convenience init(prefix: String, option: FormatOption = FormatOption()) {
+        self.init(frame: .zero)
+        self.option = option
+        setupPrefix(prefix)
+    }
+    
+    convenience init(suffix: String, option: FormatOption = FormatOption()) {
+        self.init(frame: .zero)
+        self.option = option
+        setupSuffix(suffix)
     }
     
     required init?(coder: NSCoder) {
@@ -53,7 +74,9 @@ class RATextField: UITextField {
         setupView()
     }
     
-    func setupView() {
+    private func setupView() {
+        textColor = UIColor.black
+        
         underline.backgroundColor = option.lineInactiveColor
         addSubviews(views: underline)
         underline.horizontalSuperview()
@@ -80,15 +103,11 @@ class RATextField: UITextField {
     }
     
     override func textRect(forBounds bounds: CGRect) -> CGRect {
-        var frame = bounds
-        frame.origin.x = option.leftPadding
-        return frame
+        return getTextArea(bounds: bounds)
     }
     
     override func editingRect(forBounds bounds: CGRect) -> CGRect {
-        var frame = bounds
-        frame.origin.x = option.leftPadding
-        return frame
+        return getTextArea(bounds: bounds)
     }
         
     override func becomeFirstResponder() -> Bool {
@@ -126,7 +145,7 @@ class RATextField: UITextField {
         option.titleFont = defaultFont
         titleLabel.font = font
         addSubviews(views: titleLabel)
-        titleLabel.leftToSuperview(space: option.leftPadding)
+        titleLabel.leftToSuperview()
         titleLabel.centerYToSuperview()
     }
 
@@ -203,6 +222,44 @@ class RATextField: UITextField {
         }
         isStatic = isEnabled
     }
+    
+    
+    
+    // Prefix
+    
+    private func setupPrefix(_ text: String) {
+        let label = UILabel(text: text, color: option.prefixColor)
+        label.sizeToFit()
+        label.frame.size.width += 32
+        leftView = label
+        leftViewMode = .always
+        
+        addGesture(to: label, selector: #selector(didPressPrefix))
+        prefixLabel = label
+    }
+    
+    @objc private func didPressPrefix(sender: UITapGestureRecognizer) {
+        guard let label = sender.view as? UILabel else { return }
+        raDelegate?.didPressPrefix?(label: label)
+    }
+    
+    
+    // Suffix
+    private func setupSuffix(_ text: String) {
+        let label = UILabel(text: text, color: option.prefixColor, alignment: .center)
+        label.sizeToFit()
+        label.frame.size.width += 32
+        rightView = label
+        rightViewMode = .always
+        
+        addGesture(to: label, selector: #selector(didPressSuffix))
+        suffixLabel = label
+    }
+    
+    @objc private func didPressSuffix(sender: UITapGestureRecognizer) {
+        guard let label = sender.view as? UILabel else { return }
+        raDelegate?.didPressSuffix?(label: label)
+    }
 }
 
 extension RATextField {
@@ -230,7 +287,7 @@ extension RATextField {
     }
     
     private func setTitleY(_ value: CGFloat) {
-        let newRect = CGRect(x: option.leftPadding,
+        let newRect = CGRect(x: 0,
                              y: value,
                              width: titleLabel.frame.width,
                              height: titleLabel.frame.height)
@@ -248,6 +305,26 @@ extension RATextField {
         option.titleFont = titleFont
         titleLabel.font = titleFont.withSize(titleFont.pointSize - 4)
     }
+    
+    private func getTextArea(bounds: CGRect) -> CGRect {
+        var frame = bounds
+        if let padding = prefixLabel?.frame.width {
+            frame.origin.x = padding + option.prefixPadding
+            frame.size.width = frame.size.width - frame.origin.x
+        }
+        
+        if let padding = suffixLabel?.frame.width {
+            frame.size.width = frame.size.width - padding - frame.origin.x - option.suffixPadding
+        }
+
+        return frame
+    }
+    
+    private func addGesture(to label: UILabel?, selector: Selector) {
+        guard let label = label else { return }
+        label.addGestureRecognizer(UITapGestureRecognizer(target: self, action: selector))
+        label.isUserInteractionEnabled = true
+    }
 }
 
 extension UIFont {
@@ -257,4 +334,9 @@ extension UIFont {
         ])
         return UIFont(descriptor: newDescriptor, size: pointSize)
     }
+}
+
+@objc protocol RATextFieldDelegate: UITextFieldDelegate {
+    @objc optional func didPressPrefix(label: UILabel)
+    @objc optional func didPressSuffix(label: UILabel)
 }
