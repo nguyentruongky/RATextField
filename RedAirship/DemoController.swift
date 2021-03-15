@@ -19,6 +19,8 @@ class DemoController: UITableViewController {
     let staticTextField = RATextField(label: "Static text")
     let prefixTextField = RATextField(prefix: "+84")
     let suffixTextField = RATextField(suffix: "CUR")
+    let leftIconTextField = RATextField(leftIcon: UIImage(named: "mail")!)
+    let rightIconTextField = RATextField(rightIcon: UIImage(named: "check-mark")!)
 
     
     override func viewDidLoad() {
@@ -31,6 +33,8 @@ class DemoController: UITableViewController {
         
         prefixTextField.raDelegate = self
         suffixTextField.raDelegate = self
+        leftIconTextField.raDelegate = self
+        rightIconTextField.raDelegate = self
     }
     
     // ignore
@@ -48,12 +52,21 @@ class DemoController: UITableViewController {
                                         action: #selector(toggleStatic))
         let prefixCell = createTextCell(textField: prefixTextField)
         let suffixCell = createTextCell(textField: suffixTextField)
+        let leftIconCell = createTextCell(textField: leftIconTextField)
+        leftIconTextField.setTitle("Left icon title")
+        
+        let rightIconCell = createTextCell(textField: rightIconTextField)
+        rightIconTextField.setTitle("Email")
+        rightIconTextField.setHelper(visible: true, content: "Your redairship email")
+        
         dataSource = [
-            errorCell,
-            helperCell,
-            staticCell,
-            prefixCell,
-            suffixCell
+//            errorCell,
+//            helperCell,
+//            staticCell,
+//            prefixCell,
+//            suffixCell,
+            leftIconCell,
+            rightIconCell
         ]
     }
     
@@ -139,4 +152,11 @@ extension DemoController: RATextFieldDelegate {
         label.text = "Change"
     }
     
+    func didPressLeftIcon(imageView: UIImageView) {
+        print("Hello left icon")
+    }
+    
+    func didPressRightIcon(imageView: UIImageView) {
+        print("hello right icon")
+    }
 }

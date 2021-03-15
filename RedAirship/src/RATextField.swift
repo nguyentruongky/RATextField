@@ -18,21 +18,25 @@ class RATextField: UITextField {
         var errorColor = UIColor.red
         var helperColor = UIColor.darkGray
         
-        var prefixPadding: CGFloat = 32
+        var leftPadding: CGFloat = 32
         var prefixColor = UIColor.black
         
-        var suffixPadding: CGFloat = 32
+        var rightPadding: CGFloat = 32
         var suffixColor = UIColor.black
+        
+        var iconSize: CGFloat = 32
+        var iconColor = UIColor.black
     }
     
 
     weak var raDelegate: RATextFieldDelegate?
     
     private let titleLabel = UILabel()
-    private let helperLabel = UILabel(font: .systemFont(ofSize: 12),
-                                      color: .red)
+    private let helperLabel = UILabel(font: .systemFont(ofSize: 12), color: .red)
     private var prefixLabel: UILabel?
     private var suffixLabel: UILabel?
+    private var leftIcon: UIImageView?
+    private var rightIcon: UIImageView?
     private var option: FormatOption
     private let underline = UIView(background: .gray)
     private var hasError = false
@@ -68,6 +72,18 @@ class RATextField: UITextField {
         setupSuffix(suffix)
     }
     
+    convenience init(leftIcon: UIImage, option: FormatOption = FormatOption()) {
+        self.init(frame: .zero)
+        self.option = option
+        setupLeftIcon(leftIcon)
+    }
+    
+    convenience init(rightIcon: UIImage, option: FormatOption = FormatOption()) {
+        self.init(frame: .zero)
+        self.option = option
+        setupRightIcon(rightIcon)
+    }
+    
     required init?(coder: NSCoder) {
         option = FormatOption()
         super.init(coder: coder)
@@ -85,7 +101,7 @@ class RATextField: UITextField {
         
         helperLabel.isHidden = true
         addSubviews(views: helperLabel)
-        helperLabel.horizontalSuperview(space: 8)
+        helperLabel.horizontalSuperview()
         helperLabel.bottomToSuperview(space: 16)
     }
     
@@ -129,26 +145,53 @@ class RATextField: UITextField {
     override func layoutSubviews() {
         super.layoutSubviews()
         
+        layoutTitle()
         if text?.isEmpty == true, isFirstResponder == false {
             movePlaceholderDown()
         } else  {
             setTitleY(option.titleY)
         }
+        
+        layoutIconIfNeeded(leftIcon)
+        layoutIconIfNeeded(rightIcon)
+        
     }
 
     
     
+    
+    
+}
+
+
+
+// MARK: TITLE PLACEHOLDER
+extension RATextField {
+    private func layoutTitle() {
+        if let icon = leftIcon {
+            titleLabel.frame.origin.x = icon.frame.width + option.leftPadding
+        }
+        
+        titleLabel.frame.origin.y = (frame.height - titleLabel.frame.height) / 2
+    }
+    
     // Placeholder functions
+    
+    func setTitle(_ title: String) {
+        setupPlaceholder()
+        titleLabel.text = title
+    }
     
     private func setupPlaceholder() {
         let defaultFont = font ?? UIFont.systemFont(ofSize: 17)
         option.titleFont = defaultFont
         titleLabel.font = font
+        titleLabel.textColor = option.titleColor
         addSubviews(views: titleLabel)
-        titleLabel.leftToSuperview()
-        titleLabel.centerYToSuperview()
+//        titleLabel.leftToSuperview()
+//        titleLabel.centerYToSuperview()
     }
-
+    
     private func movePlaceholderUp() {
         titleLabel.font = option.titleFont.withSize(option.titleFont.pointSize - 4)
         layoutIfNeeded()
@@ -169,7 +212,12 @@ class RATextField: UITextField {
         }
     }
     
-    
+}
+
+
+
+// MARK: HELPER TEXT
+extension RATextField {
     
     // Helper text
     
@@ -179,7 +227,7 @@ class RATextField: UITextField {
         }
         hasError = false
         setUnderlineStatus(isFirstResponder ? .active : .inactive)
-
+        
         if visible {
             helperLabel.isHidden = false
             
@@ -222,8 +270,14 @@ class RATextField: UITextField {
         }
         isStatic = isEnabled
     }
-    
-    
+
+}
+
+
+
+// MARK: PREFIX SUFFIX
+
+extension RATextField {
     
     // Prefix
     
@@ -244,7 +298,9 @@ class RATextField: UITextField {
     }
     
     
+    
     // Suffix
+    
     private func setupSuffix(_ text: String) {
         let label = UILabel(text: text, color: option.prefixColor, alignment: .center)
         label.sizeToFit()
@@ -259,6 +315,58 @@ class RATextField: UITextField {
     @objc private func didPressSuffix(sender: UITapGestureRecognizer) {
         guard let label = sender.view as? UILabel else { return }
         raDelegate?.didPressSuffix?(label: label)
+    }
+    
+}
+
+
+
+// MARK: LEFT RIGHT ICON
+extension RATextField {
+    private func layoutIconIfNeeded(_ icon: UIImageView?) {
+        if let icon = icon {
+            icon.frame.origin.y = (frame.height - icon.frame.height) / 2
+        }
+    }
+    
+    // Left Icon
+    
+    private func setupLeftIcon(_ icon: UIImage) {
+        let imageView = UIImageView(image: icon)
+        imageView.frame = CGRect(x: 0, y: 0, width: option.iconSize, height: option.iconSize)
+        imageView.changeColor(to: option.iconColor)
+        
+        leftView = imageView
+        leftViewMode = .always
+        
+        addGesture(to: imageView, selector: #selector(didPressLeftIcon))
+        leftIcon = imageView
+    }
+    
+    @objc private func didPressLeftIcon(sender: UITapGestureRecognizer) {
+        guard let imageView = sender.view as? UIImageView else { return }
+        raDelegate?.didPressLeftIcon?(imageView: imageView)
+    }
+    
+    
+    
+    // Right Icon
+    
+    private func setupRightIcon(_ icon: UIImage) {
+        let imageView = UIImageView(image: icon)
+        imageView.frame = CGRect(x: 0, y: 0, width: option.iconSize, height: option.iconSize)
+        imageView.changeColor(to: option.iconColor)
+        
+        rightView = imageView
+        rightViewMode = .always
+        
+        addGesture(to: imageView, selector: #selector(didPressRightIcon))
+        rightIcon = imageView
+    }
+    
+    @objc private func didPressRightIcon(sender: UITapGestureRecognizer) {
+        guard let imageView = sender.view as? UIImageView else { return }
+        raDelegate?.didPressRightIcon?(imageView: imageView)
     }
 }
 
@@ -287,7 +395,11 @@ extension RATextField {
     }
     
     private func setTitleY(_ value: CGFloat) {
-        let newRect = CGRect(x: 0,
+        var x: CGFloat = 0
+        if let icon = leftIcon, isFirstResponder == false, text?.isEmpty == true {
+            x = icon.frame.width + option.leftPadding
+        }
+        let newRect = CGRect(x: x,
                              y: value,
                              width: titleLabel.frame.width,
                              height: titleLabel.frame.height)
@@ -309,21 +421,30 @@ extension RATextField {
     private func getTextArea(bounds: CGRect) -> CGRect {
         var frame = bounds
         if let padding = prefixLabel?.frame.width {
-            frame.origin.x = padding + option.prefixPadding
+            frame.origin.x = padding + option.leftPadding
             frame.size.width = frame.size.width - frame.origin.x
         }
         
         if let padding = suffixLabel?.frame.width {
-            frame.size.width = frame.size.width - padding - frame.origin.x - option.suffixPadding
+            frame.size.width = frame.size.width - padding - frame.origin.x - option.rightPadding
+        }
+        
+        if let padding = leftIcon?.frame.width {
+            frame.origin.x = padding + option.leftPadding
+            frame.size.width = frame.size.width - frame.origin.x
+        }
+        
+        if let padding = rightIcon?.frame.width {
+            frame.size.width = frame.size.width - padding - frame.origin.x - option.rightPadding
         }
 
         return frame
     }
     
-    private func addGesture(to label: UILabel?, selector: Selector) {
-        guard let label = label else { return }
-        label.addGestureRecognizer(UITapGestureRecognizer(target: self, action: selector))
-        label.isUserInteractionEnabled = true
+    private func addGesture(to view: UIView?, selector: Selector) {
+        guard let view = view else { return }
+        view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: selector))
+        view.isUserInteractionEnabled = true
     }
 }
 
@@ -339,4 +460,6 @@ extension UIFont {
 @objc protocol RATextFieldDelegate: UITextFieldDelegate {
     @objc optional func didPressPrefix(label: UILabel)
     @objc optional func didPressSuffix(label: UILabel)
+    @objc optional func didPressLeftIcon(imageView: UIImageView)
+    @objc optional func didPressRightIcon(imageView: UIImageView)
 }
