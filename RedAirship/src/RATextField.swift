@@ -9,40 +9,40 @@ import UIKit
 
 class RATextField: UITextField {
     struct FormatOption {
-        var titleColor = UIColor.black
-        var titleFont = UIFont.systemFont(ofSize: 12)
+        var titleColor = UIColor.grey900
+        var titleFont = UIFont.regular(size: 16)
         var titleY: CGFloat = 0
         
-        var lineActiveColor = UIColor.blue
-        var lineInactiveColor = UIColor.lightGray
-        var errorColor = UIColor.red
-        var helperColor = UIColor.darkGray
+        var lineActiveColor = UIColor.blueLink
+        var lineInactiveColor = UIColor.disabled
+        var errorColor = UIColor.error
+        var helperColor = UIColor.grey700
         
         var leftPadding: CGFloat = 16
-        var prefixColor = UIColor.black
+        var prefixColor = UIColor.grey900
         
         var rightPadding: CGFloat = 16
-        var suffixColor = UIColor.black
+        var suffixColor = UIColor.grey900
         
         var iconSize: CGFloat = 32
-        var iconColor = UIColor.black
+        var iconColor = UIColor.grey900
         
-        var textLinkColor = UIColor.blue
-        var textLinkFont = UIFont.systemFont(ofSize: 15)
+        var textLinkColor = UIColor.blueLink
+        var textLinkFont = UIFont.regular(size: 14)
     }
     
 
     weak var raDelegate: RATextFieldDelegate?
     
-    private let titleLabel = UILabel()
-    private let helperLabel = UILabel(font: .systemFont(ofSize: 12), color: .red)
+    private let titleLabel = UILabel(font: .regular(size: 16))
+    private let helperLabel = UILabel(font: .regular(size: 14), color: UIColor.grey700)
     private var prefixLabel: UILabel?
     private var suffixLabel: UILabel?
     private var leftIcon: UIImageView?
     private var rightIcon: UIImageView?
     private var textLink: UIButton?
     private var option: FormatOption
-    private let underline = UIView(background: .gray)
+    private let underline = UIView()
     private var hasError = false
     private var isStatic = false 
     
@@ -100,6 +100,7 @@ class RATextField: UITextField {
     }
     
     private func setupView() {
+        font = .regular(size: 16)
         textColor = UIColor.black
         
         underline.backgroundColor = option.lineInactiveColor
@@ -165,11 +166,6 @@ class RATextField: UITextField {
         
         layoutTextLink()
     }
-
-    
-    
-    
-    
 }
 
 
@@ -190,7 +186,7 @@ extension RATextField {
     }
     
     private func setupPlaceholder() {
-        let defaultFont = font ?? UIFont.systemFont(ofSize: 17)
+        let defaultFont = font ?? UIFont.regular(size: 16)
         option.titleFont = defaultFont
         titleLabel.font = font
         titleLabel.textColor = option.titleColor
@@ -288,7 +284,7 @@ extension RATextField {
     // Prefix
     
     private func setupPrefix(_ text: String) {
-        let label = UILabel(text: text, color: option.prefixColor)
+        let label = UILabel(text: text, font: option.titleFont, color: option.prefixColor)
         leftView = UIView()
         leftView?.addSubviews(views: label)
         label.horizontalSuperview()
@@ -309,7 +305,7 @@ extension RATextField {
     // Suffix
     
     private func setupSuffix(_ text: String) {
-        let label = UILabel(text: text, color: option.prefixColor, alignment: .center)
+        let label = UILabel(text: text, font: option.titleFont, color: option.prefixColor)
         rightView = UIView()
         rightView?.addSubviews(views: label)
         label.horizontalSuperview()
@@ -331,17 +327,22 @@ extension RATextField {
 
 // MARK: LEFT RIGHT ICON
 extension RATextField {
+    private func createIcon(_ source: UIImage) -> UIImageView {
+        let icon = source.withRenderingMode(UIImage.RenderingMode.alwaysTemplate)
+        let imageView = UIImageView(image: icon)
+        imageView.tintColor = option.iconColor
+        return imageView
+    }
     
     // Left Icon
     
     private func setupLeftIcon(_ icon: UIImage) {
-        let size = option.iconSize - 12
-        let imageView = UIImageView(image: icon)
-        imageView.changeColor(to: option.iconColor)
+        let imageView = createIcon(icon)
         
         leftView = UIView()
         leftView?.addSubviews(views: imageView)
         leftViewMode = .always
+        let size = option.iconSize - 12
         imageView.square(edge: size)
         imageView.horizontalSuperview()
         imageView.centerYToSuperview(space: paddingFromCenter)
@@ -360,13 +361,12 @@ extension RATextField {
     // Right Icon
     
     private func setupRightIcon(_ icon: UIImage) {
-        let size = option.iconSize - 12
-        let imageView = UIImageView(image: icon)
-        imageView.changeColor(to: option.iconColor)
+        let imageView = createIcon(icon)
         
         rightView = UIView()
         rightView?.addSubviews(views: imageView)
         rightViewMode = .always
+        let size = option.iconSize - 12
         imageView.square(edge: size)
         imageView.horizontalSuperview()
         imageView.centerYToSuperview(space: paddingFromCenter)
@@ -486,14 +486,7 @@ extension RATextField {
     }
 }
 
-extension UIFont {
-    func withWeight(_ weight: UIFont.Weight) -> UIFont {
-        let newDescriptor = fontDescriptor.addingAttributes([.traits: [
-                                                                UIFontDescriptor.TraitKey.weight: weight]
-        ])
-        return UIFont(descriptor: newDescriptor, size: pointSize)
-    }
-}
+
 
 @objc protocol RATextFieldDelegate: UITextFieldDelegate {
     @objc optional func didPressPrefix(label: UILabel)
