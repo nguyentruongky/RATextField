@@ -92,20 +92,20 @@ class UIMaker {
         return tf
     }
     
-    static func makeTextView(text: String? = nil,
-                             font: UIFont = .systemFont(ofSize: 15),
-                             color: UIColor = .black,
-                             alignment: NSTextAlignment = .left) -> KMPlaceholderTextView {
-        let tf = KMPlaceholderTextView()
-        tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.font = font
-        tf.textColor = color
-        tf.backgroundColor = .white
-        tf.text = text
-        tf.textAlignment = alignment
-        tf.inputAccessoryView = makeKeyboardDoneView()
-        return tf
-    }
+//    static func makeTextView(text: String? = nil,
+//                             font: UIFont = .systemFont(ofSize: 15),
+//                             color: UIColor = .black,
+//                             alignment: NSTextAlignment = .left) -> KMPlaceholderTextView {
+//        let tf = KMPlaceholderTextView()
+//        tf.translatesAutoresizingMaskIntoConstraints = false
+//        tf.font = font
+//        tf.textColor = color
+//        tf.backgroundColor = .white
+//        tf.text = text
+//        tf.textAlignment = alignment
+//        tf.inputAccessoryView = makeKeyboardDoneView()
+//        return tf
+//    }
     
     static func makeButton(title: String? = nil,
                            titleColor: UIColor = .black,
