@@ -21,7 +21,7 @@ class DemoController: UITableViewController {
     let suffixTextField = RATextField(suffix: "CUR")
     let leftIconTextField = RATextField(leftIcon: UIImage(named: "mail")!)
     let rightIconTextField = RATextField(rightIcon: UIImage(named: "check-mark")!)
-
+    let textLinkTextField = RATextField(label: "Hello text link", textLink: "See more")
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,6 +35,7 @@ class DemoController: UITableViewController {
         suffixTextField.raDelegate = self
         leftIconTextField.raDelegate = self
         rightIconTextField.raDelegate = self
+        textLinkTextField.raDelegate = self
     }
     
     // ignore
@@ -59,14 +60,17 @@ class DemoController: UITableViewController {
         rightIconTextField.setTitle("Email")
         rightIconTextField.setHelper(visible: true, content: "Your redairship email")
         
+        let textLinkCell = createTextCell(textField: textLinkTextField)
+        
         dataSource = [
-//            errorCell,
-//            helperCell,
-//            staticCell,
-//            prefixCell,
-//            suffixCell,
+            errorCell,
+            helperCell,
+            staticCell,
+            prefixCell,
+            suffixCell,
             leftIconCell,
-            rightIconCell
+            rightIconCell,
+            textLinkCell
         ]
     }
     
@@ -158,5 +162,9 @@ extension DemoController: RATextFieldDelegate {
     
     func didPressRightIcon(imageView: UIImageView) {
         print("hello right icon")
+    }
+    
+    func didPressTextLink(textLink: UIButton) {
+        print("Hello textlink")
     }
 }

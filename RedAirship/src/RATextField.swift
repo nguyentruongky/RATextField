@@ -26,6 +26,9 @@ class RATextField: UITextField {
         
         var iconSize: CGFloat = 32
         var iconColor = UIColor.black
+        
+        var textLinkColor = UIColor.blue
+        var textLinkFont = UIFont.systemFont(ofSize: 15)
     }
     
 
@@ -37,6 +40,7 @@ class RATextField: UITextField {
     private var suffixLabel: UILabel?
     private var leftIcon: UIImageView?
     private var rightIcon: UIImageView?
+    private var textLink: UIButton?
     private var option: FormatOption
     private let underline = UIView(background: .gray)
     private var hasError = false
@@ -52,12 +56,16 @@ class RATextField: UITextField {
         setupView()
     }
     
-    convenience init(label: String, option: FormatOption = FormatOption()) {
+    convenience init(label: String, textLink: String? = nil, option: FormatOption = FormatOption()) {
         self.init(frame: .zero)
         self.option = option
         titleLabel.text = label
         titleLabel.textColor = .black
         setupPlaceholder()
+        
+        if let textLink = textLink {
+            setupTextLink(textLink)
+        }
     }
     
     convenience init(prefix: String, option: FormatOption = FormatOption()) {
@@ -83,7 +91,7 @@ class RATextField: UITextField {
         self.option = option
         setupRightIcon(rightIcon)
     }
-    
+        
     required init?(coder: NSCoder) {
         option = FormatOption()
         super.init(coder: coder)
@@ -154,7 +162,7 @@ class RATextField: UITextField {
         
         layoutIconIfNeeded(leftIcon)
         layoutIconIfNeeded(rightIcon)
-        
+        layoutTextLink()
     }
 
     
@@ -370,6 +378,32 @@ extension RATextField {
     }
 }
 
+
+
+// MARK: TEXT LINK
+extension RATextField {
+    private func layoutTextLink() {
+        if let textLink = textLink {
+            textLink.frame.origin.x = frame.width - textLink.frame.width
+            textLink.frame.origin.y = titleLabel.frame.origin.y
+        }
+    }
+    private func setupTextLink(_ title: String) {
+        let button = UIButton(title: title,
+                              titleColor: option.textLinkColor,
+                              font: option.textLinkFont)
+        button.addTarget(self, action: #selector(didPressTextLink))
+        addSubviews(views: button)
+        textLink = button
+    }
+    
+    @objc private func didPressTextLink(sender: UIButton) {
+        raDelegate?.didPressTextLink?(textLink: sender)
+    }
+}
+
+
+
 extension RATextField {
     enum UnderlineStatus {
         case active, inactive
@@ -462,4 +496,5 @@ extension UIFont {
     @objc optional func didPressSuffix(label: UILabel)
     @objc optional func didPressLeftIcon(imageView: UIImageView)
     @objc optional func didPressRightIcon(imageView: UIImageView)
+    @objc optional func didPressTextLink(textLink: UIButton)
 }
